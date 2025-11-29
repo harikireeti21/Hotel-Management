@@ -193,7 +193,8 @@ public class AdminServicesImpl implements AdminService {
 		for(HotelEntity e:hotel) {
 			HotelDto hotelDto=new HotelDto();
 			hotelDto
-		    .setHotelName(e.getHotelName())
+			.setId(e.getId())
+			.setHotelName(e.getHotelName())
 		    .setHotelLocation(e.getHotelLocation())
 		    .setHotelNumber(e.getHotelNumber())
 		    .setHotelRateing(e.getHotelRateing())
@@ -218,15 +219,17 @@ public class AdminServicesImpl implements AdminService {
 		List<RoomEntity>room=roomRepository.findAll();
 		
 		for(RoomEntity r:room) {
+			if(r.getHotel().getId()==hotelId) {
 			RoomDto roomdto=new RoomDto();
 			roomdto
+			
 			.setRoomNoOfGuest(r.getRoomNoOfGuest())
 			   .setRoomNumber(r.getRoomNumber())
 			   .setRoomPricae(r.getRoomPricae())
 			   .setRoomStatus(r.getRoomStatus())
 			   .setRoomType(r.getRoomType());
 			Roomdet.add(roomdto);
-		}
+		}}
 
 		return Roomdet;
 	}

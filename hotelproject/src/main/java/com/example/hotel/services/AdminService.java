@@ -23,6 +23,4 @@ public interface AdminService {
 	HotelDto getHotel(Long hotelId);
 	List<RoomDto> getAllRoom(Long hotelId);
 	List<HotelDto> getAllHotel();
-	
-	
 }

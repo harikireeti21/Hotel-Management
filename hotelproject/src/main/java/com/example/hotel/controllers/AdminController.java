@@ -25,7 +25,7 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/adminserver")
 public class AdminController {
 	@Autowired
-	private AdminServicesImpl  adminService;
+	private AdminService  adminService;
 	
 	@PostMapping("/create")
 	public long Create(@RequestBody AdminRegDto reg) {
@@ -34,7 +34,6 @@ public class AdminController {
 	
 	@PostMapping("/login")
 	public String Login(@RequestBody AdminLoginDto login,HttpSession session) {
-		
 		return adminService.Login(login, session);
 	}
 	 

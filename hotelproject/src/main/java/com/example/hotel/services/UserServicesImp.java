@@ -1,160 +1,189 @@
 package com.example.hotel.services;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.hotel.dtos.BookingDto;
-import com.example.hotel.dtos.HotelDto;
-import com.example.hotel.dtos.RoomDto;
-import com.example.hotel.dtos.UserLoginDto;
-import com.example.hotel.dtos.UserRegDto;
-import com.example.hotel.entitys.AdminEntity;
-import com.example.hotel.entitys.BookingEntity;
-import com.example.hotel.entitys.HotelEntity;
-import com.example.hotel.entitys.RoomEntity;
-import com.example.hotel.entitys.UserEntity;
-import com.example.hotel.repositorys.BookingRepository;
-import com.example.hotel.repositorys.HotelRepository;
-import com.example.hotel.repositorys.RoomRepository;
-import com.example.hotel.repositorys.UserRepository;
+import com.example.hotel.dtos.*;
+import com.example.hotel.entitys.*;
+import com.example.hotel.repositorys.*;
 
 import jakarta.servlet.http.HttpSession;
 
 @Service
 public class UserServicesImp implements UserService {
 
-	@Autowired
-	private UserRepository userRepository;
-	@Autowired
-	private HotelRepository hotelRepository;
-	@Autowired
-	private RoomRepository roomRepository;
-	@Autowired
-	private BookingRepository bookingRepository;
-	@Override
-	public long Create(UserRegDto reg) {
-		// TODO Auto-generated method stub
-		UserEntity user=new UserEntity();
-		
-		user
-		.setName(reg.getName())
-		.setEmaile(reg.getEmaile())
-		.setUsername(reg.getUsername())
-		.setPassword(reg.getPassword())
-		.setNumber(reg.getNumber())
-		.setRole(reg.getRole());
-		
-		userRepository.save(user);
-		return user.getId();
-	}
+    @Autowired private UserRepository userRepository;
+    @Autowired private HotelRepository hotelRepository;
+    @Autowired private RoomRepository roomRepository;
+    @Autowired private BookingRepository bookingRepository;
 
-	@Override
-	public String Login(UserLoginDto login, HttpSession session) {
-		// TODO Auto-generated method stub
-UserEntity user=userRepository.findByUsername(login.getUsername());
-		
-		if(user==null) {
-			throw new Error("User not founded!");
-		}
-		if(!user.getPassword().equals(login.getPassword())) {
-			throw new Error("Wrong Password!");
-		}
-		session.setAttribute("logedinAdmin", user);
-		return "Login Successfull";
-	}
-	@Override
-	public HotelDto getHotel(Long hotelId) {
-		// TODO Auto-generated method stub
-		 HotelEntity hotel = hotelRepository.findById(hotelId).get();
-		    HotelDto hotelDto = new HotelDto();
-		    hotelDto
-		    .setHotelName(hotel.getHotelName())
-		    .setHotelLocation(hotel.getHotelLocation())
-		    .setHotelNumber(hotel.getHotelNumber())
-		    .setHotelRateing(hotel.getHotelRateing())
-		    .setRooms( hotel.getRooms()
-		    						  .stream()
-		    						   .map( r -> new RoomDto()
-		    								   .setRoomNoOfGuest(r.getRoomNoOfGuest())
-		    								   .setRoomNumber(r.getRoomNumber())
-		    								   .setRoomPricae(r.getRoomPricae())
-		    								   .setRoomStatus(r.getRoomStatus())
-		    								   .setRoomType(r.getRoomType())).toList());
-		return hotelDto;
-	}
+    @Override
+    public long Create(UserRegDto reg) {
+        UserEntity user = new UserEntity()
+                .setName(reg.getName())
+                .setEmail(reg.getEmail())
+                .setUsername(reg.getUsername())
+                .setPassword(reg.getPassword())
+                .setNumber(reg.getNumber());
+
+        userRepository.save(user);
+        return user.getId();
+    }
+
+    @Override
+    public String Login(UserLoginDto login, HttpSession session) {
+        UserEntity user = userRepository.findByUsername(login.getUsername());
+        
+        if (user == null) throw new RuntimeException("User not found!");
+        if (!user.getPassword().equals(login.getPassword()))
+            throw new RuntimeException("Wrong password!");
+
+        session.setAttribute("logedinUser", user);
+        return "Login Successful";
+    }
+
+    @Override
+    public HotelDto getHotel(Long hotelId) {
+        HotelEntity hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new RuntimeException("Hotel not found"));
+
+        HotelDto dto = new HotelDto()
+                .setHotelName(hotel.getHotelName())
+                .setHotelLocation(hotel.getHotelLocation())
+                .setHotelNumber(hotel.getHotelNumber())
+                .setHotelRateing(hotel.getHotelRateing())
+                .setRooms(
+                        hotel.getRooms().stream().map(
+                                r -> new RoomDto()
+                                        .setRoomNoOfGuest(r.getRoomNoOfGuest())
+                                        .setRoomNumber(r.getRoomNumber())
+                                        .setRoomPricae(r.getRoomPricae())
+                                        .setRoomStatus(r.getRoomStatus())
+                                        .setRoomType(r.getRoomType())
+                        ).toList()
+                );
+
+        return dto;
+    }
+
+    @Override
+    public List<HotelDto> getAllHotel() {
+        List<HotelDto> list = new ArrayList<>();
+
+        for (HotelEntity e : hotelRepository.findAll()) {
+            list.add(new HotelDto()
+                    .setId(e.getId())
+                    .setHotelName(e.getHotelName())
+                    .setHotelLocation(e.getHotelLocation())
+                    .setHotelNumber(e.getHotelNumber())
+                    .setHotelRateing(e.getHotelRateing()));
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<RoomDto> getAllRoom(Long hotelId) {
+        HotelEntity hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new RuntimeException("Hotel not found"));
+
+        List<RoomDto> list = new ArrayList<>();
+
+        for (RoomEntity r : roomRepository.findByHotel(hotel)) {
+            list.add(new RoomDto()
+                    .setRoomNoOfGuest(r.getRoomNoOfGuest())
+                    .setRoomNumber(r.getRoomNumber())
+                    .setRoomPricae(r.getRoomPricae())
+                    .setRoomStatus(r.getRoomStatus())
+                    .setRoomType(r.getRoomType()));
+        }
+
+        return list;
+    }
+
+    @Override
+    public String Booking(Long hotelId, String roomType, LocalDate fdate, LocalDate edate, HttpSession session) {
+
+       
+        UserEntity user = (UserEntity) session.getAttribute("logedinUser");
+                    if (user == null) throw new RuntimeException("Please login first");
+        HotelEntity hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new RuntimeException("Hotel not found"));
+        List<RoomEntity> rooms = roomRepository.findByHotelAndRoomTypeIgnoreCaseAndRoomStatusIgnoreCase(
+                hotel, roomType, "UnBooked"
+        );
+
+        if (rooms.isEmpty()) throw new RuntimeException("No rooms available");
+
+        RoomEntity room = rooms.get(0); 
+
+    
+        BookingEntity bookingEntity = new BookingEntity()
+                .setHotel(hotel)
+                .setRoom(room)
+                .setUser(user)
+                .setStartDate(fdate)
+                .setEndDate(edate)
+                .setPrice(room.getRoomPricae())
+                .setBookingStatus("Active");
+
+        
+        room.setRoomStatus("Booked");
+
+      
+        bookingRepository.save(bookingEntity);
+        roomRepository.save(room);
+
+        return "Booking successful. Room no: " + room.getRoomNumber() + " in hotel: " + hotel.getHotelName();
+    }
+    
+    @Override
+    public List<BookingDto> getUserBookings(HttpSession session) {
+
+        UserEntity user = (UserEntity) session.getAttribute("logedinUser");
+        if (user == null) {
+            throw new RuntimeException("Please login first");
+        }
+
+        // Fetch all bookings of this user
+        List<BookingEntity> bookings = bookingRepository.findByUser(user);
+
+        List<BookingDto> list = new ArrayList<>();
+
+        for (BookingEntity b : bookings) {
+        	if(b.getUser().getId()==user.getId()) {
+            list.add(new BookingDto()
+            		.setBooking_id(b.getId())
+                    .setHotel_id(b.getHotel().getId())
+                    .setRoomType(b.getRoom().getRoomType())
+                    .setFdate(b.getStartDate())
+                    .setEdate(b.getEndDate())
+            );}
+        }
+
+        return list;
+    }
 
 	
-	
 	@Override
-	public List<HotelDto> getAllHotel() {
-		// TODO Auto-generated method stub
-		List<HotelDto> Hoteldet=new ArrayList<>();
-		List<HotelEntity>hotel=hotelRepository.findAll();
-		
-		for(HotelEntity e:hotel) {
-			HotelDto hotelDto=new HotelDto();
-			hotelDto
-		    .setHotelName(e.getHotelName())
-		    .setHotelLocation(e.getHotelLocation())
-		    .setHotelNumber(e.getHotelNumber())
-		    .setHotelRateing(e.getHotelRateing());
-		Hoteldet.add(hotelDto);
-		}
-		return Hoteldet;
+	public String delBooking(Long Booking_id) {
+
+	    BookingEntity booking = bookingRepository.findById(Booking_id)
+	            .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+	    RoomEntity room = booking.getRoom();
+	    room.setRoomStatus("UnBooked");
+	    roomRepository.save(room);  
+
+	    bookingRepository.deleteById(Booking_id);
+
+	    return "Booking is canceled";
 	}
 
-	@Override
-	public List<RoomDto> getAllRoom(Long hotelId) {
-		Optional<HotelEntity> opHotel = hotelRepository.findById(hotelId);
-		if(opHotel.isEmpty()) {
-		throw new Error("There is no room for this Hotel!");
-		}
-		List<RoomDto> Roomdet=new ArrayList<>();
-		List<RoomEntity>room=roomRepository.findAll();
-		
-		for(RoomEntity r:room) {
-			RoomDto roomdto=new RoomDto();
-			roomdto
-			.setRoomNoOfGuest(r.getRoomNoOfGuest())
-			   .setRoomNumber(r.getRoomNumber())
-			   .setRoomPricae(r.getRoomPricae())
-			   .setRoomStatus(r.getRoomStatus())
-			   .setRoomType(r.getRoomType());
-			Roomdet.add(roomdto);
-		}
-
-		return Roomdet;
-	}
-
-	@Override
-	public String Booking(BookingDto booking,Long roomId,Long userId) {
-		// TODO Auto-generated method stub
-		BookingEntity book=new BookingEntity();
-		Optional<UserEntity>opuser=userRepository.findById(userId);
-		Optional<RoomEntity>opRoom=roomRepository.findById(roomId);
-		if(opRoom.isEmpty() || opuser.isEmpty()) {
-			throw new Error("The (Room or user) data is Miss Match!");
-		}
-		RoomEntity room=new RoomEntity();
-		room.setRoomStatus("Booked");
-		roomRepository.save(room);
-		
-		book
-		.setDate(booking.getDate())
-		.setHotelId(booking.getHotelId())
-		.setRoomId(booking.getRoomId())
-		.setUserId(booking.getUserId());
-		
-		
-		bookingRepository.save(book);
-		
-		
-		return "Hotel is Booked Successfuly!";
-	}
-
+    
 
 }
