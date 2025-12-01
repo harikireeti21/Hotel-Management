@@ -1,19 +1,17 @@
 package com.example.hotel.services;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.example.hotel.dtos.AdminLoginDto;
-import com.example.hotel.dtos.AdminRegDto;
 import com.example.hotel.dtos.HotelDto;
+import com.example.hotel.dtos.LoginDtos;
 import com.example.hotel.dtos.RoomDto;
+import com.example.hotel.dtos.UserDtos;
 import com.example.hotel.entitys.AdminEntity;
 import com.example.hotel.entitys.HotelEntity;
-import com.example.hotel.entitys.RoomEntity;
 import com.example.hotel.entitys.RoomEntity;
 import com.example.hotel.repositorys.AdminRepository;
 import com.example.hotel.repositorys.HotelRepository;
@@ -32,7 +30,7 @@ public class AdminServicesImpl implements AdminService {
 	@Autowired
 	private RoomRepository roomRepository;
 	@Override
-	public long Create(AdminRegDto reg) {
+	public long Create(UserDtos reg) {
 		// TODO Auto-generated method stub
 		
 		AdminEntity admin =new AdminEntity();
@@ -42,16 +40,16 @@ public class AdminServicesImpl implements AdminService {
 		.setEmail(reg.getEmail())
 		.setNumber(reg.getNumber())
 		.setPassword(reg.getPassword())
-		.setUserName(reg.getUsername());
+		.setUserName(reg.getUserName());
 		
 		adminRepository.save(admin);
 		return admin.getId();
 	}
 
 	@Override
-	public String Login(AdminLoginDto login,HttpSession session) {
+	public String Login(UserDtos login,HttpSession session) {
 		// TODO Auto-generated method stub
-		AdminEntity admin=adminRepository.findByUserName(login.getUsername());
+		AdminEntity admin=adminRepository.findByUserName(login.getUserName());
 		
 		if(admin==null) {
 			throw new Error("Admin not founded!");
@@ -222,7 +220,7 @@ public class AdminServicesImpl implements AdminService {
 			if(r.getHotel().getId()==hotelId) {
 			RoomDto roomdto=new RoomDto();
 			roomdto
-			
+			.setRoomid(r.getId())
 			.setRoomNoOfGuest(r.getRoomNoOfGuest())
 			   .setRoomNumber(r.getRoomNumber())
 			   .setRoomPricae(r.getRoomPricae())
@@ -232,6 +230,25 @@ public class AdminServicesImpl implements AdminService {
 		}}
 
 		return Roomdet;
+	}
+
+	@Override
+	public String AddRoom(RoomDto roomdto, Long hotelId) {
+		Optional<HotelEntity> Hotel = hotelRepository.findById(hotelId);
+		if(Hotel.isEmpty()) {
+		throw new Error("Hotel not Founded!");
+		}
+		RoomEntity room=new RoomEntity();
+		room
+		.setHotel(Hotel.get())
+		.setRoomNoOfGuest(roomdto.getRoomNoOfGuest())
+		.setRoomNumber(roomdto.getRoomNumber())
+		.setRoomPricae(roomdto.getRoomPricae())
+		.setRoomStatus(roomdto.getRoomStatus())
+		.setRoomType(roomdto.getRoomType());
+		
+		roomRepository.save(room);
+			return "The room was Updated";
 	}
 
 	

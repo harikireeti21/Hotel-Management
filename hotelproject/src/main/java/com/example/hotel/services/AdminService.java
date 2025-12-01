@@ -1,21 +1,18 @@
 package com.example.hotel.services;
 
 import com.example.hotel.dtos.HotelDto;
+import com.example.hotel.dtos.LoginDtos;
 import com.example.hotel.dtos.RoomDto;
-import com.example.hotel.entitys.HotelEntity;
-
+import com.example.hotel.dtos.UserDtos;
 import java.util.List;
-
-import com.example.hotel.dtos.AdminLoginDto;
-import com.example.hotel.dtos.AdminRegDto;
-
 import jakarta.servlet.http.HttpSession;
 
 public interface AdminService {
 
-	long Create(AdminRegDto reg);
-	String Login(AdminLoginDto login,HttpSession session);
+	long Create(UserDtos reg);
+	String Login(UserDtos login,HttpSession session);
 	String CreateHotel(HotelDto hotel);
+	String AddRoom(RoomDto room ,Long hotelId);
 	String UpdateHotel(HotelDto uphotel,Long id);
 	String UpdateRoom(RoomDto upRoom,Long roomId,Long hotelId);
 	String delHotel(Long id);

@@ -1,6 +1,6 @@
 package com.example.hotel.controllers;
 
-import java.util.List;
+import java.util.List; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +18,12 @@ public class UserController {
     private UserService userServicesImp;
 
     @PostMapping("/create")
-    public long Create(@RequestBody UserRegDto reg) {
+    public long Create(@RequestBody UserDtos reg) {
         return userServicesImp.Create(reg);
     }
 
     @PostMapping("/login")
-    public String Login(@RequestBody UserLoginDto login, HttpSession session) {
+    public String Login(@RequestBody UserDtos login, HttpSession session) {
         return userServicesImp.Login(login, session);
     }
 

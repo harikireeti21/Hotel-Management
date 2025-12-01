@@ -22,11 +22,12 @@ public class UserServicesImp implements UserService {
     @Autowired private BookingRepository bookingRepository;
 
     @Override
-    public long Create(UserRegDto reg) {
+    public long Create(UserDtos reg) {
+    	System.out.println(reg);
         UserEntity user = new UserEntity()
                 .setName(reg.getName())
                 .setEmail(reg.getEmail())
-                .setUsername(reg.getUsername())
+                .setUsername(reg.getUserName())
                 .setPassword(reg.getPassword())
                 .setNumber(reg.getNumber());
 
@@ -35,8 +36,8 @@ public class UserServicesImp implements UserService {
     }
 
     @Override
-    public String Login(UserLoginDto login, HttpSession session) {
-        UserEntity user = userRepository.findByUsername(login.getUsername());
+    public String Login(UserDtos login, HttpSession session) {
+        UserEntity user = userRepository.findByUsername(login.getUserName());
         
         if (user == null) throw new RuntimeException("User not found!");
         if (!user.getPassword().equals(login.getPassword()))

@@ -1,6 +1,6 @@
 package com.example.hotel.controllers;
 
-import java.util.List;
+import java.util.List; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,11 +11,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.example.hotel.dtos.AdminLoginDto;
-import com.example.hotel.dtos.AdminRegDto;
 import com.example.hotel.dtos.HotelDto;
+import com.example.hotel.dtos.LoginDtos;
 import com.example.hotel.dtos.RoomDto;
+import com.example.hotel.dtos.UserDtos;
 import com.example.hotel.services.AdminService;
 import com.example.hotel.services.AdminServicesImpl;
 
@@ -28,12 +27,12 @@ public class AdminController {
 	private AdminService  adminService;
 	
 	@PostMapping("/create")
-	public long Create(@RequestBody AdminRegDto reg) {
+	public long Create(@RequestBody UserDtos reg) {
 		return adminService.Create(reg);
 	}
 	
 	@PostMapping("/login")
-	public String Login(@RequestBody AdminLoginDto login,HttpSession session) {
+	public String Login(@RequestBody LoginDtos login,HttpSession session) {
 		return adminService.Login(login, session);
 	}
 	 
@@ -74,5 +73,10 @@ public class AdminController {
 	public List<HotelDto> getAllHotel(){
 		return adminService.getAllHotel();
 	}
+	@PostMapping("/addRoom/{hotelId}")
+	public String addRoom(@RequestBody RoomDto roomDto, @PathVariable("hotelId") Long hotelId) {
+	    return adminService.AddRoom(roomDto, hotelId);
+	}
+
 //	
 }
